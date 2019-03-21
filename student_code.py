@@ -141,7 +141,76 @@ class KnowledgeBase(object):
             string explaining hierarchical support from other Facts and rules
         """
         ####################################################
-        # Student code goes here
+        result = ""
+        if(factq(fact_or_rule)):
+            if (fact_or_rule not in self.facts):
+                return "Fact is not in the KB"
+            real = self._get_fact(fact_or_rule)
+            result += "fact: " + str(real.statement)
+        elif(isinstance(fact_or_rule, Rule)):
+            if (fact_or_rule not in self.rules):
+                return "Rule is not in the KB"
+            real = self._get_rule(fact_or_rule)
+            result += "rule: (" + str(real.lhs[0])
+            for state in real.lhs[1:]:
+                result += ", " + str(state)
+            result += ") -> " + str(real.rhs)
+        else:
+            return False
+        
+        if(real.asserted):
+            result+= " ASSERTED\n"
+        else:
+            result += "\n"
+    
+        for supportGrouping in real.supported_by:
+            result += "  SUPPORTED BY\n"
+            for supportItem in supportGrouping:
+                #breakpoint()
+                tempResult = self.explain_recurse(supportItem, 0)
+                if (tempResult != False):
+                    result += tempResult
+
+        return result
+
+    def explain_recurse(self, fact_or_rule, depth):
+        result = ""
+        pad = "    "
+        for i in range(depth*2):
+            pad += "  "
+
+        if(factq(fact_or_rule)):
+            if (fact_or_rule not in self.facts):
+                return "Fact is not in the KB"
+            real = self._get_fact(fact_or_rule)
+            result += pad + "fact: " + str(real.statement)
+        elif(isinstance(fact_or_rule, Rule)):
+            if (fact_or_rule not in self.rules):
+                return "Rule is not in the KB"
+            real = self._get_rule(fact_or_rule)
+            result += pad + "rule: (" + str(real.lhs[0])
+            for state in real.lhs[1:]:
+                result += ", " + str(state)
+            result += ") -> " + str(real.rhs)
+        else:
+            return False
+        
+        if(real.asserted):
+            result+= " ASSERTED\n"
+        else:
+            result += "\n"
+    
+        for supportGrouping in real.supported_by:
+            result += pad + "  SUPPORTED BY\n"
+            for supportItem in supportGrouping:
+                #breakpoint()
+                tempResult = self.explain_recurse(supportItem, depth+1)
+                if (tempResult != False):
+                    result += tempResult
+
+        return result
+        
+        
 
 
 class InferenceEngine(object):
